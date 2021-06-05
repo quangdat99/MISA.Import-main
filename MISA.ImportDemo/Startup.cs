@@ -98,12 +98,17 @@ namespace MISA.ImportDemo
             services.AddScoped<IImportEmployeeService, ImportEmployeeService>();
             services.AddScoped<IImportEmployeeRepository, ImportEmployeeRepository>();
 
+            // 3.1 Nhập khẩu Khách hàng:
+            services.AddScoped<IImportCustomerService, ImportCustomerService>();
+            services.AddScoped<IImportCustomerRepository, ImportCustomerRepository>();
+
             // 4. Khác
             services.AddScoped<IOrganizationService, OrganizationService>();
             services.AddScoped<IOrganizationRepository, OrganizationRepository>();
             services.AddScoped<IEmployeeRepository, EmployeeRepository>();
+            //services.AddScoped<ICustomerRepository, CustomerRepository>();
 
-            
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

@@ -76,6 +76,27 @@
             <returns></returns>
             CreateBy: NVMANH (20/04/2020)
         </member>
+        <member name="T:MISA.ImportDemo.Controllers.ImportCustomersController">
+            <summary>
+            Service thực hiện nhập khẩu nhân viên
+            </summary>
+            Author: NVMANH (10/10/2020)
+        </member>
+        <member name="M:MISA.ImportDemo.Controllers.ImportCustomersController.#ctor(MISA.ImportDemo.Core.Interfaces.IImportCustomerService)">
+            <summary>
+            Khởi tạo service
+            </summary>
+            <param name="importService"></param>
+        </member>
+        <member name="M:MISA.ImportDemo.Controllers.ImportCustomersController.UploadImportFile(Microsoft.AspNetCore.Http.IFormFile,System.Threading.CancellationToken)">
+            <summary>
+            Api thực hiện việc đọc và phân loại dữ liệu từ file Excel - hồ sơ lao động
+            </summary>
+            <param name="fileImport">Tệp nhập khẩu</param>
+            <param name="cancellationToken">Tham số tùy chọn xử lý đa luồng (hiện tại chưa sử dụng)</param>
+            <returns>200: Nhập khẩu thành công</returns>
+            CreatedBy: NVMANH(05/2020)
+        </member>
         <member name="T:MISA.ImportDemo.Controllers.ImportEmployeesController">
             <summary>
             Service thực hiện nhập khẩu nhân viên
