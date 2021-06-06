@@ -24,6 +24,8 @@ namespace MISA.ImportDemo.Infrastructure.Data.Repositories
     {
         protected readonly IEntityRepository _entityRepository;
         protected readonly IMemoryCache _importMemoryCache;
+        protected readonly List<CustomerGroup> CustomerGroups;
+
         protected readonly List<Nationality> Nationalities;
         protected readonly List<Relation> Relations;
         protected readonly List<Ethnic> Ethnics;
@@ -41,6 +43,8 @@ namespace MISA.ImportDemo.Infrastructure.Data.Repositories
             Ethnics = dbContext.Ethnic.ToList();
             Positions = dbContext.Position.ToList().Where(e=>e.OrganizationId==_organization.OrganizationId).ToList();
             Departments = dbContext.Department.ToList().Where(e => e.OrganizationId == _organization.OrganizationId).ToList();
+            CustomerGroups = dbContext.CustomerGroup.ToList();
+
             // Cache lại:
             CacheGetOrCreate();
         }
@@ -118,6 +122,9 @@ namespace MISA.ImportDemo.Infrastructure.Data.Repositories
                     break;
                 case "Nationality":
                     list = (await dbContext.Nationality.ToListAsync()).Cast<object>().ToList();
+                    break;
+                case "CustomerGroup":
+                    list = (await dbContext.CustomerGroup.ToListAsync()).Cast<object>().ToList();
                     break;
                 default:
                     break;

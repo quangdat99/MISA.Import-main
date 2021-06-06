@@ -44,6 +44,8 @@ namespace MISA.ImportDemo.Core.Entities
         public string Email { get; set; }
 
         public Guid? CustomerGroupId { get; set; }
+        public int? EthnicId { get; set; }
+        public int? NationalityId { get; set; }
 
         [NotMapped]
         public string CustomerGroupName { get; set; }
@@ -60,10 +62,10 @@ namespace MISA.ImportDemo.Core.Entities
         public DateTime? ModifiedDate { get; set; }
         public string ModifiedBy { get; set; }
 
-        public virtual CustomerGroup CustomerGroup { get; set; }
+        //public virtual CustomerGroup CustomerGroup { get; set; }
 
-        public virtual Ethnic Ethnic { get; set; }
-        public virtual Nationality Nationality { get; set; }
+        //public virtual Ethnic Ethnic { get; set; }
+        //public virtual Nationality Nationality { get; set; }
         public virtual ICollection<CustomerReffered> CustomerReffered { get; set; }
 
     }

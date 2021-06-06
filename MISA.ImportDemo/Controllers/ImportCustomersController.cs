@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using MISA.ImportDemo.Core.Entities;
+using MISA.ImportDemo.Core.Enumeration;
 using MISA.ImportDemo.Core.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -13,7 +14,7 @@ namespace MISA.ImportDemo.Controllers
     /// <summary>
     /// Service thực hiện nhập khẩu nhân viên
     /// </summary>
-    /// Author: NVMANH (10/10/2020)
+    /// Author:  DQDAT (6/6/2021)
     [Route("api/v1/[controller]")]
     [ApiController]
     public class ImportCustomersController : BaseEntityController<ImportFileTemplate>
@@ -35,12 +36,27 @@ namespace MISA.ImportDemo.Controllers
         /// <param name="fileImport">Tệp nhập khẩu</param>
         /// <param name="cancellationToken">Tham số tùy chọn xử lý đa luồng (hiện tại chưa sử dụng)</param>
         /// <returns>200: Nhập khẩu thành công</returns>
-        /// CreatedBy: NVMANH(05/2020)
+        /// CreatedBy: DQDAT (6/6/2021)
         [HttpPost("reader")]
         public async Task<IActionResult> UploadImportFile(IFormFile fileImport, CancellationToken cancellationToken)
         {
             var res = await _importService.ReadCustomerDataFromExcel(fileImport, cancellationToken);
             return Ok(res);
+        }
+
+        /// <summary>
+        /// Thực hiện nhập khẩu dữ liệu
+        /// </summary>
+        /// <param name="keyImport">Key xác định lấy dữ liệu để nhập khẩu từ cache</param>
+        /// <param name="overriderData">Có cho phép ghi đè hay không (true- ghi đè dữ liệu trùng lặp trong db)</param>
+        /// <param name="cancellationToken">Tham số tùy chọn xử lý đa luồng (hiện tại chưa sử dụng)</param>
+        /// <returns>ActionResult(với các thông tin tương ứng tùy thuộc kết nhập khẩu)</returns>
+        /// CreatedBy: DQDAT (6/6/2021)
+        [HttpPost("{keyImport}")]
+        public async Task<ActionResult<ImportFileTemplate>> Post(string keyImport, bool overriderData, CancellationToken cancellationToken)
+        {
+            return Ok(await _importService.Import(keyImport, overriderData, cancellationToken));
+            //return Ok(new ActionServiceResult(true, Core.Properties.Resources.Msg_ImportSuccess, MISACode.Success));
         }
     }
 }

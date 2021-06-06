@@ -80,7 +80,7 @@
             <summary>
             Service thực hiện nhập khẩu nhân viên
             </summary>
-            Author: NVMANH (10/10/2020)
+            Author:  DQDAT (6/6/2021)
         </member>
         <member name="M:MISA.ImportDemo.Controllers.ImportCustomersController.#ctor(MISA.ImportDemo.Core.Interfaces.IImportCustomerService)">
             <summary>
@@ -95,7 +95,17 @@
             <param name="fileImport">Tệp nhập khẩu</param>
             <param name="cancellationToken">Tham số tùy chọn xử lý đa luồng (hiện tại chưa sử dụng)</param>
             <returns>200: Nhập khẩu thành công</returns>
-            CreatedBy: NVMANH(05/2020)
+            CreatedBy: DQDAT (6/6/2021)
+        </member>
+        <member name="M:MISA.ImportDemo.Controllers.ImportCustomersController.Post(System.String,System.Boolean,System.Threading.CancellationToken)">
+            <summary>
+            Thực hiện nhập khẩu dữ liệu
+            </summary>
+            <param name="keyImport">Key xác định lấy dữ liệu để nhập khẩu từ cache</param>
+            <param name="overriderData">Có cho phép ghi đè hay không (true- ghi đè dữ liệu trùng lặp trong db)</param>
+            <param name="cancellationToken">Tham số tùy chọn xử lý đa luồng (hiện tại chưa sử dụng)</param>
+            <returns>ActionResult(với các thông tin tương ứng tùy thuộc kết nhập khẩu)</returns>
+            CreatedBy: DQDAT (6/6/2021)
         </member>
         <member name="T:MISA.ImportDemo.Controllers.ImportEmployeesController">
             <summary>

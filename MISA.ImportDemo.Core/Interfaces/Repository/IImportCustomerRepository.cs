@@ -7,17 +7,17 @@ using System.Threading.Tasks;
 namespace MISA.ImportDemo.Core.Interfaces.Repository
 {
     /// <summary>
-    /// Interface khai báo các hàm cung cấp cho việc nhập khẩu nhân viên
+    /// Interface khai báo các hàm cung cấp cho việc nhập khẩu khách hàng
     /// </summary>
-    /// CreatedBy: NVMANH (06/06/2020)
+    /// CreatedBy:  DQDAT (6/6/2021)
     public interface IImportCustomerRepository:IBaseImportRepository
     {
 
         /// <summary>
-        /// Lấy toàn bộ danh sách nhân viên có trong Db
+        /// Lấy toàn bộ danh sách khách hàng có trong Db
         /// </summary>
-        /// <returns>List Nhân viên</returns>
-        /// CreatedBy: NVMANH (06/06/2020)
+        /// <returns>List Khách hàng</returns>
+        /// CreatedBy:  DQDAT (6/6/2021)
         Task<List<Customer>> GetCustomers();
     }
 }

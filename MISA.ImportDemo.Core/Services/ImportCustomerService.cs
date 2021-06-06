@@ -17,9 +17,9 @@ using System.Threading.Tasks;
 namespace MISA.ImportDemo.Core.Services
 {
     /// <summary>
-    /// Service xử lý việc nhập khẩu nhân viên
+    /// Service xử lý việc nhập khẩu khách hàng
     /// </summary>
-    /// CreatedBy: NVMANH (10/10/2020)
+    /// CreatedBy:  DQDAT (6/6/2021)
     public class ImportCustomerService : BaseImportService, IImportCustomerService
     {
         public ImportCustomerService(IImportCustomerRepository importRepository, IMemoryCache importMemoryCache) : base(importRepository, importMemoryCache, "Customer")
@@ -27,9 +27,17 @@ namespace MISA.ImportDemo.Core.Services
 
         }
 
-        public Task<ActionServiceResult> Import(string importKey, bool overriderData, CancellationToken cancellationToken)
+        /// <summary>
+        /// Thực hiện nhập khẩu dữ liệu
+        /// </summary>
+        /// <param name="keyImport">Key xác định lấy dữ liệu để nhập khẩu từ cache</param>
+        /// <param name="overriderData">Có cho phép ghi đè hay không (true- ghi đè dữ liệu trùng lặp trong db)</param>
+        /// <param name="cancellationToken">Tham số tùy chọn xử lý đa luồng (hiện tại chưa sử dụng)</param>
+        /// <returns>ActionServiceResult(với các thông tin tương ứng tùy thuộc kết nhập khẩu)</returns>
+        /// CreatedBy:  DQDAT (6/6/2021)
+        public async Task<ActionServiceResult> Import(string keyImport, bool overriderData, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            return await _importRepository.Import(keyImport, overriderData, cancellationToken);
         }
 
         /// <summary>
@@ -38,7 +46,7 @@ namespace MISA.ImportDemo.Core.Services
         /// <param name="importFile">Tệp nhập khẩu</param>
         /// <param name="cancellationToken">Tham số tùy chọn sử dụng xử lý Task đa luồng</param>
         /// <returns>ActionServiceResult(với các thông tin tương ứng tùy thuộc kết quả đọc tệp)</returns>
-        /// CreatedBy: NVMANH (10/10/2020)
+        /// CreatedBy:  DQDAT (6/6/2021)
         public async Task<ActionServiceResult> ReadCustomerDataFromExcel(IFormFile importFile, CancellationToken cancellationToken)
         {
             // Lấy dữ liệu nhân viên trên Db về để thực hiện check trùng:
@@ -47,16 +55,14 @@ namespace MISA.ImportDemo.Core.Services
             var importInfo = new ImportInfo(String.Format("CustomerImport_{0}", Guid.NewGuid()), customers);
             // Lưu dữ liệu vào cache:
             importMemoryCache.Set(importInfo.ImportKey, customers);
-            // Lưu các vị trí mới vào cache:
-            importMemoryCache.Set(string.Format("Position_{0}", importInfo.ImportKey), _newPossitons);
             return new ActionServiceResult(true, Resources.Msg_ImportFileReadSuccess, MISACode.Success, importInfo);
         }
 
         /// <summary>
-        ///  Lấy toàn bộ danh sách Nhân viên đang có trong Database theo từng công ty.
+        ///  Lấy toàn bộ danh sách khách hàng đang có trong Database theo từng công ty.
         ///  với bộ hồ sơ (ProfileBook) đang nhập khẩu vào - lưu vào cache để thực hiện check trùng
         /// </summary>
-        /// CreatedBy: NVMANH (02/06/2020)
+        /// CreatedBy:  DQDAT (6/6/2021)
         private async Task<List<Customer>> GetCustomersFromDatabase()
         {
             var importRepository = _importRepository as IImportCustomerRepository;
@@ -65,20 +71,20 @@ namespace MISA.ImportDemo.Core.Services
         }
 
         /// <summary>
-        /// Check trùng dữ liệu trong File Excel và trong database, dựa vào số chứng minh thư
+        /// Check trùng dữ liệu trong File Excel và trong database, dựa vào mã khách hàng
         /// </summary>
         /// <typeparam name="T">Generic Type</typeparam>
         /// <param name="entitiesInFile">Danh sách các đối tượng được build từ tệp nhập khẩu</param>
         /// <param name="entity">thực thể hiện tại</param>
         /// <param name="cellValue">Giá trị nhập trong ô excel đang đọc</param>
         /// <param name="importColumn">Thông tin cột nhập khẩu (tiêu đề cột, kiểu giá trị....)</param>
-        /// CreatedBy: NVMANH (19/06/2020)
+        /// CreatedBy:  DQDAT (6/6/2021)
         protected override void CheckDuplicateData<T>(List<T> entitiesInFile, T entity, object cellValue, ImportColumn importColumn)
         {
             if (entity is Customer)
             {
                 var newCustomer = entity as Customer;
-                // Validate: kiểm tra trùng dữ liệu trong File Excel và trong Database: check theo số CMTND
+                // Validate: kiểm tra trùng dữ liệu trong File Excel và trong Database: check theo Mã khách hàng
                 if (importColumn.ColumnInsert == "CustomerCode" && cellValue != null)
                 {
                     var customerCode = cellValue.ToString().Trim();
@@ -87,18 +93,15 @@ namespace MISA.ImportDemo.Core.Services
                     if (itemDuplicate != null)
                     {
                         entity.ImportValidState = ImportValidState.DuplicateInFile;
-                        entity.ImportValidError.Add(string.Format("Mã khách hàng {0} bị trùng với khách hàng khác trong tệp nhập khẩu.", customerCode));
+                        entity.ImportValidError.Add(string.Format(CustomerResource.Error_ImportCustomerCodeDuplicateInFile, customerCode));
                     }
                     // Check trong Db:
                     var itemDuplicateInDb = EntitiesFromDatabase.Where(item => (item.GetType().GetProperty("CustomerCode").GetValue(item) ?? string.Empty).ToString() == customerCode).Cast<T>().FirstOrDefault();
                     if (itemDuplicateInDb != null)
                     {
                         entity.ImportValidState = ImportValidState.DuplicateInDb;
-                        //newCustomer.CustomerId = (Guid)itemDuplicateInDb.GetType().GetProperty("CustomerId").GetValue(itemDuplicateInDb);
-                        //itemDuplicateInDb.ImportValidState = ImportValidState.DuplicateInFile;
-                        entity.ImportValidError.Add(string.Format("Mã khách hàng {0} bị trùng với khách hàng khác trong hệ thống.", customerCode));
-                        //itemDuplicateInDb.ImportValidError.Add(string.Format(Resources.Error_ImportDataDuplicateInDatabase, itemDuplicateInDb.GetType().GetProperty("FullName").GetValue(itemDuplicateInDb).ToString()));
-                    }
+                        entity.ImportValidError.Add(string.Format(CustomerResource.Error_ImportCustomerCodeDuplicateInDatabase, customerCode));
+                   }
                 }
             }
             else
@@ -114,7 +117,7 @@ namespace MISA.ImportDemo.Core.Services
         /// </summary>
         /// <typeparam name="T">Kiểu của object</typeparam>
         /// <returns>Thực thể được khởi tạo với kiểu tương ứng</returns>
-        /// OverriderBy: NVMANH (15/12/2020)
+        /// OverriderBy:  DQDAT (6/6/2021)
         protected override dynamic InstanceEntityBeforeMappingData<T>()
         {
             var ImportToTable = ImportWorksheetTemplate.ImportToTable;
@@ -142,7 +145,7 @@ namespace MISA.ImportDemo.Core.Services
         /// </summary>
         /// <typeparam name="T">kiểu của object</typeparam>
         /// <param name="entity">object thành viên trong gia đình</param>
-        /// OverriderBy: NVMANH (15/12/2020)
+        /// OverriderBy:  DQDAT (6/6/2021)
         protected override void ProcessDataAfterBuild<T>(object entity)
         {
             if (entity is CustomerReffered)
@@ -176,7 +179,7 @@ namespace MISA.ImportDemo.Core.Services
         /// <param name="type">Kiểu dữ liệu</param>
         /// <param name="importColumn">Thông tin cột import được khai báo trong Db</param>
         /// <returns>giá trị ngày tháng được chuyển đổi tương ứng</returns>
-        /// CreatedBy: NVMANH (25/05/2020)
+        /// CreatedBy:  DQDAT (6/6/2021)
         protected override DateTime? GetProcessDateTimeValue<T>(T entity, object cellValue, Type type, ImportColumn importColumn = null)
         {
             if ((entity is Customer && importColumn.ColumnInsert == "DateOfBirth"))

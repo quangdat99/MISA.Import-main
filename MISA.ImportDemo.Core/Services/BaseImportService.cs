@@ -28,6 +28,7 @@ namespace MISA.ImportDemo.Core.Services
         #region DECLARE
         protected IBaseImportRepository _importRepository;
         protected IMemoryCache importMemoryCache;
+        protected List<CustomerGroup> CustomerGroups;
         protected List<Nationality> Nationalities;
         protected List<Position> Positions;
         protected List<Department> Departments;
@@ -52,6 +53,7 @@ namespace MISA.ImportDemo.Core.Services
             this.importMemoryCache = importMemoryCache;
             TableToImport = tableToImport;
             // Lấy dữ liệu từ cache:
+            CustomerGroups = (List<CustomerGroup>)_importRepository.CacheGet("CustomerGroups");
             Nationalities = (List<Nationality>)_importRepository.CacheGet("Nationalities");
             Positions = (List<Position>)_importRepository.CacheGet("Positions");
             Departments = (List<Department>)_importRepository.CacheGet("Departments");

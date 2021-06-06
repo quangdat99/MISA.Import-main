@@ -18,6 +18,8 @@ namespace MISA.ImportDemo.Infrastructure.Data
         }
 
         public virtual DbSet<Department> Department { get; set; }
+        public virtual DbSet<CustomerGroup> CustomerGroup { get; set; }
+
         public virtual DbSet<Employee> Employee { get; set; }
         public virtual DbSet<EmployeeFamily> EmployeeFamily { get; set; }
         public virtual DbSet<Ethnic> Ethnic { get; set; }
