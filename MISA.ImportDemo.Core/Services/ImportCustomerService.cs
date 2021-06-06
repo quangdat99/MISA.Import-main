@@ -84,7 +84,7 @@ namespace MISA.ImportDemo.Core.Services
             if (entity is Customer)
             {
                 var newCustomer = entity as Customer;
-                // Validate: kiểm tra trùng dữ liệu trong File Excel và trong Database: check theo Mã khách hàng
+                // Validate: kiểm tra trùng dữ liệu trong File Excel và trong Database: check theo số CMTND
                 if (importColumn.ColumnInsert == "CustomerCode" && cellValue != null)
                 {
                     var customerCode = cellValue.ToString().Trim();
@@ -93,15 +93,20 @@ namespace MISA.ImportDemo.Core.Services
                     if (itemDuplicate != null)
                     {
                         entity.ImportValidState = ImportValidState.DuplicateInFile;
-                        entity.ImportValidError.Add(string.Format(CustomerResource.Error_ImportCustomerCodeDuplicateInFile, customerCode));
+                        itemDuplicate.ImportValidState = ImportValidState.DuplicateInFile;
+                        entity.ImportValidError.Add(string.Format(Resources.Error_ImportDataDuplicateInFile,"customerCode"));
+                        itemDuplicate.ImportValidError.Add(string.Format(Resources.Error_ImportDataDuplicateInFile, "customerCode"));
                     }
                     // Check trong Db:
                     var itemDuplicateInDb = EntitiesFromDatabase.Where(item => (item.GetType().GetProperty("CustomerCode").GetValue(item) ?? string.Empty).ToString() == customerCode).Cast<T>().FirstOrDefault();
                     if (itemDuplicateInDb != null)
                     {
                         entity.ImportValidState = ImportValidState.DuplicateInDb;
-                        entity.ImportValidError.Add(string.Format(CustomerResource.Error_ImportCustomerCodeDuplicateInDatabase, customerCode));
-                   }
+                        newCustomer.CustomerId = (Guid)itemDuplicateInDb.GetType().GetProperty("CustomerId").GetValue(itemDuplicateInDb);
+                        itemDuplicateInDb.ImportValidState = ImportValidState.DuplicateInFile;
+                        entity.ImportValidError.Add(string.Format(Resources.Error_ImportDataDuplicateInDatabase,"customerCode"));
+                        itemDuplicateInDb.ImportValidError.Add(string.Format(Resources.Error_ImportDataDuplicateInDatabase, "customerCode"));
+                    }
                 }
             }
             else

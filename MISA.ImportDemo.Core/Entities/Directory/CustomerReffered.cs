@@ -1,6 +1,7 @@
 ﻿using MISA.ImportDemo.Core.Enumeration;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Text;
 
 namespace MISA.ImportDemo.Core.Entities
@@ -8,11 +9,13 @@ namespace MISA.ImportDemo.Core.Entities
     public class CustomerReffered:BaseEntity
     {
         public Guid CustomerRefferedId { get; set; }
+        public Guid? CustomerId { get; set; }
         public string CustomerCode { get; set; }
         public string FullName { get; set; }
 
         public string PhoneNumber { get; set; }
         public int Gender { get; set; }
+        [NotMapped]
         public string GenderName
         {
             get
@@ -37,14 +40,16 @@ namespace MISA.ImportDemo.Core.Entities
         }
 
         public DateTime? DateOfBirth { get; set; }
-        public DateDisplaySetting DobdisplaySetting { get; set; } =  DateDisplaySetting.ddmmyyyy;
-        public int? NationalityId { get; set; }
-        public int? EthnicId { get; set; }
+        [NotMapped]
         public DateTime? CreatedDate { get; set; }
+        [NotMapped]
         public string CreatedBy { get; set; }
+        [NotMapped]
         public DateTime? ModifiedDate { get; set; }
+        [NotMapped]
         public string ModifiedBy { get; set; }
 
+        [NotMapped]
         public int? Sort { get; set; }
     }
 }

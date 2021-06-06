@@ -48,18 +48,41 @@ namespace MISA.ImportDemo.Infrastructure.Data.Repositories
         /// CreatedBy:  DQDAT (6/6/2021)
         public override async Task<ActionServiceResult> Import(string importKey, bool overriderData, CancellationToken cancellationToken)
         {
-            // Danh sách khách hàng hợp lệ
-            var customers = ((List<Customer>)CacheGet(importKey)).Where(e => e.ImportValidState == ImportValidState.Valid).ToList(); ;
-            var numberCustomerAddSuccess = 0;
-            var numberCustomerRefferedAddSuccess = 0;
-            // Thêm mới các khách hàng hợp lệ vào DB
-            customers.ForEach(cus => numberCustomerAddSuccess += InsertCustomer(cus));
+            var customers = ((List<Customer>)CacheGet(importKey)).Where(e => e.ImportValidState == ImportValidState.Valid || (overriderData && e.ImportValidState == ImportValidState.DuplicateInDb)).ToList(); ;
 
-            // Thêm mới khách hàng được giới thiệu vào DB
-            customers.ForEach(cus => cus.CustomerReffered.ToList().ForEach(cusRef => numberCustomerRefferedAddSuccess += InsertCustomerReffered(cusRef)));
+            using var dbContext = new EfDbContext();
 
 
-            return new ActionServiceResult(true, String.Format(CustomerResource.Success_ImportCustomerAndCustomerReffered, numberCustomerAddSuccess, numberCustomerRefferedAddSuccess), MISACode.Success, customers);
+            // Danh sách nhân viên thêm mới:
+            var newCustomers = customers.Where(e => e.ImportValidState == Core.Enumeration.ImportValidState.Valid).ToList();
+            await dbContext.Customer.AddRangeAsync(newCustomers);
+
+            // Danh sách nhân viên thực hiện ghi đè:
+            var modifiedCustomers = customers.Where(e => e.ImportValidState == Core.Enumeration.ImportValidState.DuplicateInDb).ToList();
+            foreach (var customer in modifiedCustomers)
+            {
+                dbContext.Entry(customer).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
+                var pbd = dbContext.CustomerReffered.Where(c => c.CustomerId == customer.CustomerId);
+                dbContext.CustomerReffered.AddRange(customer.CustomerReffered);
+                dbContext.CustomerReffered.RemoveRange(pbd);
+            }
+            //dbContext.Employee.UpdateRange(modifiedEmployees);
+            await dbContext.SaveChangesAsync();
+            return new ActionServiceResult(true, Resources.Msg_ImportSuccess, MISACode.Success, customers);
+
+            //// Danh sách khách hàng hợp lệ
+            //var customers = ((List<Customer>)CacheGet(importKey)).Where(e => e.ImportValidState == ImportValidState.Valid).ToList(); ;
+            //var numberCustomerAddSuccess = 0;
+            //var numberCustomerRefferedAddSuccess = 0;
+
+            //// Thêm mới các khách hàng hợp lệ vào DB
+            //customers.ForEach(cus => numberCustomerAddSuccess += InsertCustomer(cus));
+
+            //// Thêm mới khách hàng được giới thiệu vào DB
+            //customers.ForEach(cus => cus.CustomerReffered.ToList().ForEach(cusRef => numberCustomerRefferedAddSuccess += InsertCustomerReffered(cusRef)));
+
+
+            //return new ActionServiceResult(true, String.Format(CustomerResource.Success_ImportCustomerAndCustomerReffered, numberCustomerAddSuccess, numberCustomerRefferedAddSuccess), MISACode.Success, customers);
         }
 
 
@@ -70,8 +93,12 @@ namespace MISA.ImportDemo.Infrastructure.Data.Repositories
         /// CreatedBy:  DQDAT (6/6/2021)
         public async Task<List<Customer>> GetCustomers()
         {
-            var customers = await DbConnection.QueryAsync<Customer>("Proc_GetCustomers", commandType: CommandType.StoredProcedure);
-            return customers.ToList();
+            //var customers = await DbConnection.QueryAsync<Customer>("Proc_GetCustomers", commandType: CommandType.StoredProcedure);
+            //return customers.ToList();
+
+            using var dbContext = new EfDbContext();
+            var customers = await dbContext.Customer.ToListAsync();
+            return customers;
         }
 
         /// <summary>
