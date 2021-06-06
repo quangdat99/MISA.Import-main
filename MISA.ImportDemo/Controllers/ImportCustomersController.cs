@@ -56,7 +56,6 @@ namespace MISA.ImportDemo.Controllers
         public async Task<ActionResult<ImportFileTemplate>> Post(string keyImport, bool overriderData, CancellationToken cancellationToken)
         {
             return Ok(await _importService.Import(keyImport, overriderData, cancellationToken));
-            //return Ok(new ActionServiceResult(true, Core.Properties.Resources.Msg_ImportSuccess, MISACode.Success));
         }
     }
 }

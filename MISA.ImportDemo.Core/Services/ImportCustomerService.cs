@@ -94,8 +94,8 @@ namespace MISA.ImportDemo.Core.Services
                     {
                         entity.ImportValidState = ImportValidState.DuplicateInFile;
                         itemDuplicate.ImportValidState = ImportValidState.DuplicateInFile;
-                        entity.ImportValidError.Add(string.Format(Resources.Error_ImportDataDuplicateInFile,"customerCode"));
-                        itemDuplicate.ImportValidError.Add(string.Format(Resources.Error_ImportDataDuplicateInFile, "customerCode"));
+                        entity.ImportValidError.Add(string.Format(CustomerResource.Error_ImportCustomerCodeDuplicateInFile, customerCode));
+                        itemDuplicate.ImportValidError.Add(string.Format(CustomerResource.Error_ImportCustomerCodeDuplicateInFile, customerCode));
                     }
                     // Check trong Db:
                     var itemDuplicateInDb = EntitiesFromDatabase.Where(item => (item.GetType().GetProperty("CustomerCode").GetValue(item) ?? string.Empty).ToString() == customerCode).Cast<T>().FirstOrDefault();
@@ -104,8 +104,8 @@ namespace MISA.ImportDemo.Core.Services
                         entity.ImportValidState = ImportValidState.DuplicateInDb;
                         newCustomer.CustomerId = (Guid)itemDuplicateInDb.GetType().GetProperty("CustomerId").GetValue(itemDuplicateInDb);
                         itemDuplicateInDb.ImportValidState = ImportValidState.DuplicateInFile;
-                        entity.ImportValidError.Add(string.Format(Resources.Error_ImportDataDuplicateInDatabase,"customerCode"));
-                        itemDuplicateInDb.ImportValidError.Add(string.Format(Resources.Error_ImportDataDuplicateInDatabase, "customerCode"));
+                        entity.ImportValidError.Add(string.Format(CustomerResource.Error_ImportCustomerCodeDuplicateInDatabase,customerCode));
+                        itemDuplicateInDb.ImportValidError.Add(string.Format(CustomerResource.Error_ImportCustomerCodeDuplicateInDatabase, customerCode));
                     }
                 }
             }
@@ -160,6 +160,8 @@ namespace MISA.ImportDemo.Core.Services
                 var customerMaster = _entitiesFromEXCEL.Cast<Customer>().Where(pbd => pbd.CustomerCode == customerCode).FirstOrDefault();
                 if (customerMaster != null && customerCode != null)
                 {
+                    customerReffered.CustomerId = customerMaster.CustomerId;
+
                     customerMaster.CustomerReffered.Add(customerReffered);
 
                     // Duyệt từng lỗi của detail và add thông tin vào master:
